@@ -63,7 +63,6 @@ main .features {
 
 .sites-list {
     height: 90vh;
-    overflow: auto;
 
     a {
         text-decoration: none;
@@ -76,4 +75,15 @@ main .features {
         text-decoration: none;
         transform: scale(1.05);
     }
+}
+
+tbody {
+    display: block;
+    overflow: auto;
+    height: 85vh;
+    width: 100%;
+}
+
+thead tr {
+    display: block;
 }

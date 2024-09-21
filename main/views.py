@@ -1,6 +1,9 @@
 from azure.identity import ClientSecretCredential
 from django.shortcuts import render
 from msgraph import GraphServiceClient
+from msgraph.generated.sites.item.lists.item.items.items_request_builder import ItemsRequestBuilder
+from kiota_abstractions.base_request_configuration import RequestConfiguration
+
 from office365.graph_client import GraphClient
 
 scopes = ['https://graph.microsoft.com/.default']
@@ -11,13 +14,15 @@ client_id = '30f9999e-20ce-4e18-bb00-cb03b7899ee3'
 client_secret = 'KwL8Q~gQ~WDozL3w.kn4a7ovi2uRDFaAxMl~Vcqb'
 url = 'https://smartholdingcom.sharepoint.com/'
 
+
 def index(request):
     return render(request, 'main/index.html')
+
 
 async def sites(request):
     data = {
         'title': 'Список сайтів',
-        'sites': ''
+        'sites': []
     }
 
     # client = GraphClient(acquire_token_func)
@@ -29,15 +34,43 @@ async def sites(request):
 
     site_list = await graph_client.sites.get_all_sites.get()
 
-    data['sites'] = site_list.value
-
     for site in site_list.value:
-        result = await graph_client.sites.by_site_id(site.id).permissions.get()
-        print(result)
+        if not site.is_personal_site:
+
+            query_params = ItemsRequestBuilder.ItemsRequestBuilderGetQueryParameters(
+                expand=["fields"],
+            )
+
+            request_configuration = RequestConfiguration(
+                query_parameters=query_params,
+            )
+
+            res = await graph_client.sites.by_site_id(site.id).lists.by_list_id('User Information List').items.get(
+                request_configuration=request_configuration)
+
+            users = []
+
+            for r in res.value:
+                if r.fields.additional_data.get('ContentType') == 'Person' and r.fields.additional_data.get(
+                        'Title') != 'NT Service\spsearch' and r.fields.additional_data.get(
+                    'Title') != 'SharePoint App' and r.fields.additional_data.get(
+                    'Title') != 'System Account' and r.fields.additional_data.get(
+                    'Title') != 'NT Service\SPSearch' and r.fields.additional_data.get(
+                    'Title') != 'Site Collection Adm':
+                    users.append(r.fields.additional_data.get('Title'))
+
+            site_with_permissions = {
+                'site': site,
+                'permissions': users
+            }
+
+            data['sites'].append(site_with_permissions)
 
     return render(request, 'main/sites.html', data)
 
+
 import msal
+
 
 def acquire_token_func():
     """
@@ -52,8 +85,8 @@ def acquire_token_func():
     token = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
     return token
 
-def get_client():
 
+def get_client():
     # azure.identity.aio
     credential = ClientSecretCredential(
         tenant_id=tenant_id,
@@ -62,4 +95,4 @@ def get_client():
 
     graph_client = GraphServiceClient(credential, scopes)
 
-    return graph_client# type: ignore
+    return graph_client  # type: ignore

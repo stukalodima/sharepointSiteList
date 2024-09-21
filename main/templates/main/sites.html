@@ -9,20 +9,30 @@
                 <thead>
                 <tr>
                     {#                    <th scope="col">#</th>#}
-                    <th scope="col">Назва</th>
-                    <th scope="col">Адреса</th>
-                    <th scope="col">Персональний</th>
+                    <th scope="col" style="width: 350px">Назва</th>
+{#                    <th scope="col">Адреса</th>#}
+                    <th scope="col" style="width: 100vw">Користувачі</th>
                 </tr>
                 </thead>
                 <tbody>
-                {% for site in sites %}
+                {% for site_with_permission in sites %}
                     <tr>
                         {#                        <th scope="row">{% sites. %}</th>#}
-                        <td style="text-align: start">{{ site.display_name }}</td>
-                        <td style="text-align: start">
-                            <a target="_blank" href="{{ site.web_url }}">{{ site.web_url }}</a>
+                        <td style="text-align: start; width: 350px">
+                            <a target="_blank" href="{{ site_with_permission.site.web_url }}">
+                                {{ site_with_permission.site.display_name }}
+                            </a>
                         </td>
-                        <td style="text-align: center">{{ site.is_personal_site }}</td>
+{#                        <td style="text-align: start; width: 200px">#}
+{#                            <a target="_blank"#}
+{#                               href="{{ site_with_permission.site.web_url }}">{{ site_with_permission.site.web_url }}</a>#}
+{#                        </td>#}
+                        <td style="text-align: start">
+                            {% for permission in site_with_permission.permissions %}
+                                &nbsp;|&nbsp;<span>{{ permission }}</span>
+                            {% endfor %}
+                            &nbsp;|&nbsp;
+                        </td>
                     </tr>
                 {% endfor %}
                 </tbody>
