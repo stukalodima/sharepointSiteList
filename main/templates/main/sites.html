@@ -11,16 +11,18 @@
                     {#                    <th scope="col">#</th>#}
                     <th scope="col">Назва</th>
                     <th scope="col">Адреса</th>
+                    <th scope="col">Персональний</th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for site in sites %}
                     <tr>
                         {#                        <th scope="row">{% sites. %}</th>#}
-                        <td style="text-align: start">{{ site.name }}</td>
+                        <td style="text-align: start">{{ site.display_name }}</td>
                         <td style="text-align: start">
                             <a target="_blank" href="{{ site.web_url }}">{{ site.web_url }}</a>
                         </td>
+                        <td style="text-align: center">{{ site.is_personal_site }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>

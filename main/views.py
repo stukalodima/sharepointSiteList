@@ -1,4 +1,6 @@
+from azure.identity import ClientSecretCredential
 from django.shortcuts import render
+from msgraph import GraphServiceClient
 from office365.graph_client import GraphClient
 
 scopes = ['https://graph.microsoft.com/.default']
@@ -12,16 +14,26 @@ url = 'https://smartholdingcom.sharepoint.com/'
 def index(request):
     return render(request, 'main/index.html')
 
-def sites(request):
+async def sites(request):
     data = {
         'title': 'Список сайтів',
         'sites': ''
     }
 
-    client = GraphClient(acquire_token_func)
-    site_list = client.sites.get().execute_query()
+    # client = GraphClient(acquire_token_func)
+    # site_list = client.sites.get().execute_query()
+    #
+    # data['sites'] = site_list
 
-    data['sites'] = site_list
+    graph_client = get_client()
+
+    site_list = await graph_client.sites.get_all_sites.get()
+
+    data['sites'] = site_list.value
+
+    for site in site_list.value:
+        result = await graph_client.sites.by_site_id(site.id).permissions.get()
+        print(result)
 
     return render(request, 'main/sites.html', data)
 
@@ -39,3 +51,15 @@ def acquire_token_func():
     )
     token = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
     return token
+
+def get_client():
+
+    # azure.identity.aio
+    credential = ClientSecretCredential(
+        tenant_id=tenant_id,
+        client_id=client_id,
+        client_secret=client_secret)
+
+    graph_client = GraphServiceClient(credential, scopes)
+
+    return graph_client# type: ignore
