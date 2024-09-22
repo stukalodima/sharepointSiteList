@@ -29,5 +29,7 @@
         "env.bak{,/**}",
         "venv.bak{,/**}",
         ".vscode{,/**}"
-    ]
+    ],
+    "appService.defaultWebAppToDeploy": "undefined/subscriptions/a8c4cfe0-642a-4c8b-869a-8df68ebd5667/resourceGroups/appsvc_linux_centralus_basic/providers/Microsoft.Web/sites/spo-site-list",
+    "appService.deploySubpath": "."
 }
